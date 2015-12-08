@@ -9,11 +9,13 @@ export default Ember.Mixin.create({
     if (this.container) {
       this.set('container', this.container);
 
-      if (!onlineStore)
+      if (!onlineStore) {
         onlineStore = this.container.onlineStore;
+      }
 
-      if (!offlineStore)
+      if (!offlineStore) {
         offlineStore = this.container.store;
+      }
     }
 
     this.set('offlineStore', offlineStore);

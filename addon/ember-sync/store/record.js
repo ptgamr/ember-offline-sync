@@ -69,8 +69,7 @@ export default Ember.Object.extend({
    * @private
    */
   _serializeAssociations: function() {
-    var serializedCollection = [],
-        _this = this,
+    var _this = this,
         snapshot = this._snapshot();
 
     snapshot.eachRelationship(function(name, relationship) {
@@ -87,7 +86,7 @@ export default Ember.Object.extend({
         }
 
         _this.get('collection')[type].push(serialized);
-      }
+      };
 
       /**
        * Will push belongsTo assocs to the final collection.
@@ -122,12 +121,12 @@ export default Ember.Object.extend({
 
     snapshot.eachAttribute(function(attr, details) {
       attr = _this._serializer(snapshot.modelName).keyForAttribute(attr);
-      if (details.type == "date" && typeof serializedAttrs[attr]) {
+      if (details.type === "date" && typeof serializedAttrs[attr]) {
         if (serializedAttrs[attr]) {
           serializedAttrs[attr] = new Date(Date.parse(serializedAttrs[attr]));
         } else {
           console.log('there is no ' + attr + ' in ' + JSON.stringify(serializedAttrs));
-          throw "WAT?"
+          throw "WAT?";
           //serialized[attr] = new Date(Date.parse(fakeRecord.get('createdAt')));
         }
       }

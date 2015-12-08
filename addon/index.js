@@ -143,7 +143,7 @@ export default Ember.Object.extend(
     return record;
   },
 
-  embedThisIntoRecord: function(record, type, properties) {
+  embedThisIntoRecord: function(record, type/*, properties*/) {
     var _this = this;
 
     record.emberSync = Ember.Object.create({

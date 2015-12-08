@@ -16,7 +16,7 @@ export default Ember.Object.extend(
     var _this = this,
         record;
 
-    return new Ember.RSVP.Promise(function(resolve, reject) {
+    return new Ember.RSVP.Promise(function(resolve) {
       record = _this.createRecordInStore();
       record = _this.setRelationships(record);
 
@@ -32,9 +32,9 @@ export default Ember.Object.extend(
     properties = this.propertiesToPersist();
     this.rollbackExistingRecord();
 
-    if (operation == "create") {
+    if (operation === "create") {
       record = this.onlineStore.createRecord(type, properties);
-    } else if (operation == "update") {
+    } else if (operation === "update") {
       record = this.onlineStore.push(type, properties);
     }
     /**
@@ -123,7 +123,7 @@ export default Ember.Object.extend(
        * relationships don't exist anymore offline, we need to generate a new
        * one, fake, with the same ID, just to send to the server.
        */
-      if (kind == "belongsTo") {
+      if (kind === "belongsTo") {
         var relationId = _this.get('jobRecord.serialized')[name];
 
         if (relationId && !relation) {
@@ -134,7 +134,7 @@ export default Ember.Object.extend(
           onlineRelation = _this.generateRelationForRecord(type, relation);
           pendingRecord.set(key, onlineRelation);
         }
-      } else if (kind == "hasMany") {
+      } else if (kind === "hasMany") {
         relation.forEach(function(relation) {
           onlineRelation = _this.generateRelationForRecord(type, relation);
           pendingRecord.get(name).pushObject(onlineRelation);
@@ -166,7 +166,7 @@ export default Ember.Object.extend(
     if (!record) {
       record = this.onlineStore.push(type, {id: 1});
     }
-    record.eachRelationship(function(name, descriptor) {
+    record.eachRelationship(function(name) {
       delete serializedCopy[name];
     });
 

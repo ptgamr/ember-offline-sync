@@ -4,8 +4,7 @@ import Job            from './job';
 
 var queueTimer = null,
     testing = window.TEST,
-    supressConsoleErrors = true,
-    forceSyncFailure = false;
+    supressConsoleErrors = true;
 
 export default Ember.Object.extend(
   StoreInitMixin, {
@@ -23,9 +22,9 @@ export default Ember.Object.extend(
     }
 
     if (testing) {
-      this.set('beginQueueProcessingDelay', 1)
+      this.set('beginQueueProcessingDelay', 1);
     } else {
-      this.set('beginQueueProcessingDelay', 500)
+      this.set('beginQueueProcessingDelay', 500);
     }
   },
 
@@ -40,7 +39,7 @@ export default Ember.Object.extend(
     job = this.offlineStore.createRecord('ember-sync-queue-model', {
       jobRecordType: type,
       operation:     operation,
-      createdAt:     (new Date).toUTCString(),
+      createdAt:     (new Date()).toUTCString(),
       serialized:    properties
     });
     adapter = this.offlineStore.adapterFor(type);
@@ -54,7 +53,7 @@ export default Ember.Object.extend(
     var _this = this,
         jobs;
 
-    Em.run.cancel(queueTimer);
+    Ember.run.cancel(queueTimer);
 
     jobs = this.offlineStore.findAll('ember-sync-queue-model');
     jobs.then(function(jobs) {
@@ -66,13 +65,13 @@ export default Ember.Object.extend(
        * TODO - shouldn't push duplicated jobs
        */
       _this.set('pendingJobs', Ember.A(jobs));
-      var processTimer = Em.run.later(function() {
+      var processTimer = Ember.run.later(function() {
         _this.processNextJob();
       }, _this.get('beginQueueProcessingDelay'));
 
       _this.setProcessTimer(processTimer);
     }, function() {
-      var processTimer = Em.run.later(function() {
+      var processTimer = Ember.run.later(function() {
         _this.process();
       }, _this.get('emptyQueueRetryDelay'));
 
@@ -94,7 +93,7 @@ export default Ember.Object.extend(
       }
 
       if (!testing) {
-        var processTimer = Em.run.later(function() {
+        var processTimer = Ember.run.later(function() {
           _this.process();
         }, 3500);
 
@@ -119,7 +118,7 @@ export default Ember.Object.extend(
       _this.set('isError', false);
 
       _this.removeJobFromQueue(jobRecord).then(function() {
-        var processTimer = Em.run.later(function() {
+        var processTimer = Ember.run.later(function() {
           _this.processNextJob();
         }, 1);
 
@@ -134,14 +133,14 @@ export default Ember.Object.extend(
        * Makes errors be called only once per job trial.
        */
       if (!_this.get('isError') && !testing) {
-        Em.run(function() {
+        Ember.run(function() {
           _this.onError();
         });
       }
       _this.set('isError', true);
 
       if (!testing) {
-        var processTimer = Em.run.later(function() {
+        var processTimer = Ember.run.later(function() {
           _this.processNextJob();
         }, _this.get('retryOnFailureDelay'));
 
@@ -151,8 +150,9 @@ export default Ember.Object.extend(
   },
 
   setProcessTimer: function(reference) {
-    if (queueTimer)
-      Em.run.cancel(queueTimer);
+    if (queueTimer) {
+      Ember.run.cancel(queueTimer);
+    }
 
     queueTimer = reference;
   },
@@ -165,7 +165,7 @@ export default Ember.Object.extend(
         return false;
       }
 
-      return pendingJob.get('id') == job.get('id');
+      return pendingJob.get('id') === job.get('id');
     });
 
     this.set('pendingJobs', newQueue);

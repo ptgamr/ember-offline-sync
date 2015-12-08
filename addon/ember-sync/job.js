@@ -27,7 +27,7 @@ export default Ember.Object.extend(
     });
   },
 
-  synchronizeOnline: function(options) {
+  synchronizeOnline: function(/* options */) {
     var recordPromise,
         operation = this.get('jobRecord.operation'),
         _this = this;
@@ -36,13 +36,13 @@ export default Ember.Object.extend(
       console.log("[DEBUG] EmberSync.Job#perform -> #synchronizeOnline: operation", operation);
     }
 
-    if (operation == "delete") {
+    if (operation === "delete") {
       recordPromise = this.deletion();
     } else {
       recordPromise = this.save();
     }
 
-    recordPromise.then(function(record) {
+    recordPromise.then(function(/* record */) {
       if (_this.get('debug')) {
         console.log("[DEBUG] EmberSync.Job#synchronizeOnline: record saved");
       }
@@ -57,7 +57,7 @@ export default Ember.Object.extend(
 
   save: function() {
     var _this = this,
-        record, recordForSynchronization;
+        recordForSynchronization;
 
     return this.findOfflineRecord().then(function(offlineRecord) {
       recordForSynchronization = RecordForSynchronization.create({
@@ -88,7 +88,7 @@ export default Ember.Object.extend(
         type = this.get('jobRecord.jobRecordType'),
         id = this.get('jobRecord.serialized.id');
 
-    return new Ember.RSVP.Promise(function(resolve, reject) {
+    return new Ember.RSVP.Promise(function(resolve) {
       var record, preExisting;
 
       preExisting = _this.onlineStore.hasRecordForId(type, id);

@@ -24,10 +24,10 @@ export default Ember.Object.extend(
     var _this = this, offlineSearch, onlineSearch;
 
     if(!Ember.isNone(query)) {
-      offlineSearch = this.offlineStore.query(type, query),
+      offlineSearch = this.offlineStore.query(type, query);
       onlineSearch  = this.onlineStore.query(type, query);
     } else {
-      offlineSearch = this.offlineStore.findAll(type),
+      offlineSearch = this.offlineStore.findAll(type);
       onlineSearch  = this.onlineStore.findAll(type);
     }
 
@@ -57,7 +57,7 @@ export default Ember.Object.extend(
         var id = record.get('id'),
             persistenceState = _this.offlineStore.find(type, id);
 
-        var persistRecordOffline = function(onlineRecord) {
+        var persistRecordOffline = function() {
           var persistence = Persistence.create({
             onlineStore:  _this.onlineStore,
             offlineStore: _this.offlineStore,
@@ -131,7 +131,7 @@ export default Ember.Object.extend(
         var id = onlineResult.get('id'),
             persistenceState = _this.offlineStore.find(type, id);
 
-        var persistRecordOffline = function(onlineRecord) {
+        var persistRecordOffline = function() {
           var persistence = Persistence.create({
             onlineStore:  _this.onlineStore,
             offlineStore: _this.offlineStore,
@@ -141,8 +141,8 @@ export default Ember.Object.extend(
 
         persistenceState.then(persistRecordOffline, persistRecordOffline);
       });
-    }, function(error) {
-      _this.get('onError')
+    }, function() {
+      _this.get('onError');
     });
 
     return resultStream;
