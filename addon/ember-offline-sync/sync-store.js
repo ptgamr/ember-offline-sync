@@ -3,6 +3,8 @@ import Ember from 'ember';
 // import SynchronizationJob from './synchronization-job';
 import RecordWrapper from './record-wrapper';
 
+const {get, set} = Ember;
+
 export default Ember.Object.extend({
   onlineStore: null,
   offlineStore: null,
@@ -47,8 +49,7 @@ export default Ember.Object.extend({
             recordWrapper.set('content', record);
             resolve(recordWrapper);
 
-            
-
+            this.offlineStore.pushPayload(type, record.serialize());
           }
         })
         .catch(error => {
@@ -67,19 +68,40 @@ export default Ember.Object.extend({
 
     let results = Ember.ArrayProxy.create();
 
+    let isResolved = false;
+
     offlinePromise
-      .then(this._wrapRecords)
+      .then(this._wrapRecords.bind(this, type))
       .then(recordWrappers => {
-        results.set('content', recordWrappers);
+        if (!isResolved) {
+          isResolved = true;
+          results.set('content', recordWrappers);
+        }
       })
       .catch(error => {
         console.error('Offline findAll()', error);
       });
 
     onlinePromise
-      .then(this._wrapRecords)
-      .then(recordWrappers => {
-        results.set('content', recordWrappers);
+      .then(this._wrapRecords.bind(this, type))
+      .then(recordsWrapper => {
+        
+        Ember.run.later(function() {
+          if (!isResolved) {
+            isResolved = true;
+            results.set('content', recordsWrapper);
+          }
+        }, 100);
+
+        recordsWrapper.forEach(recordWrapper => {
+          let record  = get(recordWrapper, 'content');
+          this.offlineStore.findRecord(type, get(record, 'id'))
+            .catch(() => {
+              console.log('push record to offline store', record.serialize({includeId: true}));
+              let localRecord = this.offlineStore.createRecord('todo', record.serialize({includeId: true}));
+              localRecord.save();
+            });
+        });
       })
       .catch(error => {
         console.error('Online findAll()', error);
@@ -106,6 +128,19 @@ export default Ember.Object.extend({
 
   sync() {
 
-  }
+  },
 
+  flushPendingChange(/*pendingChange*/) {
+
+  },
+
+  _wrapRecords(type, records) {
+    return records.map(record => {
+      return RecordWrapper.create({
+        syncStore: this,
+        recordType: type,
+        content: record
+      });
+    });
+  }
 });
