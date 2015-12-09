@@ -39,19 +39,16 @@ export default Ember.Object.extend({
 
       onlinePromise
         .then(record => {
-          recordWrapper.set('content', record);
 
-          // update the offline record with the one from server
-          // TODO: there might be different version of the remote record
-          //      if there are modification locally, in this case should throw a ConflictError
-          // this.offlineStore.findRecord(type, id).then(offlineRecord => {
-          //   offlineRecord.
-          // }, () => {
-          //   record
-          // });
-
+          // promise has not been resolved
+          // means that localRecord is not found
+          // we push the remoteRecord into offlineStore
           if (!isResolved) {
+            recordWrapper.set('content', record);
             resolve(recordWrapper);
+
+            
+
           }
         })
         .catch(error => {
