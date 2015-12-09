@@ -9,8 +9,8 @@
 <ul>
   {{#each model as |todo|}}
   <li>
-    <u>{{todo.id}}</u> <strong>{{todo.title}}</strong>
-    <br/> is done: {{todo.isDone}} &nbsp;&nbsp;&nbsp;&nbsp; <a href {{action 'deleteTodo' todo}}>Delete</a>
+    <u>{{todo.id}}</u> <strong>{{todo.title}}</strong> <input type="checkbox" checked={{todo.isDone}} onclick={{action "toggleDone" todo}} />
+    <br/> <a href {{action 'deleteTodo' todo}}>Delete</a>
     <br/>
     <br/>
   </li>

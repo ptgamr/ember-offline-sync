@@ -14,6 +14,9 @@ export default Ember.ObjectProxy.extend({
   recordType: null,
 
   save() {
-    console.log('RecordWrapper: save()', this.content);
+
+    this.get('content').save();
+
+    console.log('RecordWrapper: save()', this.get('content').toJSON());
   }
 });

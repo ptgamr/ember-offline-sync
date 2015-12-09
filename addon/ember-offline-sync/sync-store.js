@@ -63,51 +63,31 @@ export default Ember.Object.extend({
   },
 
   findAll(type) {
-    let offlinePromise = this.offlineStore.findAll(type),
-        onlinePromise = this.onlineStore.findAll(type);
+    let offlinePromise = this.offlineStore.findAll(type).then(this._wrapRecords.bind(this, type)),
+        onlinePromise = this.onlineStore.findAll(type).then(this._wrapRecords.bind(this, type));
 
-    let results = Ember.ArrayProxy.create();
-
-    let isResolved = false;
+    let resultsStream = Ember.ArrayProxy.create();
 
     offlinePromise
-      .then(this._wrapRecords.bind(this, type))
-      .then(recordWrappers => {
-        if (!isResolved) {
-          isResolved = true;
-          results.set('content', recordWrappers);
-        }
-      })
-      .catch(error => {
-        console.error('Offline findAll()', error);
-      });
-
-    onlinePromise
-      .then(this._wrapRecords.bind(this, type))
-      .then(recordsWrapper => {
-        
-        Ember.run.later(function() {
-          if (!isResolved) {
-            isResolved = true;
-            results.set('content', recordsWrapper);
-          }
-        }, 100);
-
-        recordsWrapper.forEach(recordWrapper => {
+      .then(this._addRecordsToStream.bind(this, resultsStream))
+      .then(() => onlinePromise)
+      .then(this._addRecordsToStream.bind(this, resultsStream))
+      .then(onlineRecords => {
+        onlineRecords.forEach(recordWrapper => {
           let record  = get(recordWrapper, 'content');
           this.offlineStore.findRecord(type, get(record, 'id'))
             .catch(() => {
               console.log('push record to offline store', record.serialize({includeId: true}));
-              let localRecord = this.offlineStore.createRecord('todo', record.serialize({includeId: true}));
-              localRecord.save();
+              let offlineAdapter = this.offlineStore.adapterFor(type);
+              offlineAdapter.createRecord(this.offlineStore, this.offlineStore.modelFor(type), record._createSnapshot());
             });
         });
       })
       .catch(error => {
-        console.error('Online findAll()', error);
+        console.error('findAll()', error);
       });
 
-    return results;
+    return resultsStream;
   },
 
   query() {
@@ -142,5 +122,23 @@ export default Ember.Object.extend({
         content: record
       });
     });
+  },
+
+  _addRecordsToStream(resultsStream, recordWrappers) {
+    let recordsInStream = get(resultsStream, 'content');
+
+    if (recordsInStream) {
+      let recordIds = recordsInStream.mapBy('id');
+      let recordsToAdd = recordWrappers.filter(recordWrapper => {
+        let id = get(recordWrapper, 'id');
+        return recordIds.indexOf(id) === -1;
+      });
+
+      recordsInStream.pushObjects(recordsToAdd);
+    } else {
+      set(resultsStream, 'content', recordWrappers);
+    }
+
+    return recordWrappers;
   }
 });

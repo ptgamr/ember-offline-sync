@@ -19,6 +19,11 @@ export default Ember.Controller.extend({
 
     deleteTodo(todo) {
       todo.destroyRecord();
+    },
+
+    toggleDone(todo) {
+      todo.set('isDone', !todo.get('isDone'));
+      todo.save();
     }
   }
 });
