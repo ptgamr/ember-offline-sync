@@ -1,66 +1,19 @@
 import Ember from 'ember';
-// import SynchronizationQueue from './synchronization-queue';
-// import SynchronizationJob from './synchronization-job';
-
-const {get, set} = Ember;
 
 export default Ember.Object.extend({
   onlineStore: null,
   offlineStore: null,
 
-  findRecord(type, id) {
-    // return new Ember.RSVP.Promise((resolve, reject) => {
-    //   let offlinePromise = this.offlineStore.findRecord(type, id),
-    //       onlinePromise = this.onlineStore.findRecord(type, id);
-    //
-    //   let isResolved = false,
-    //       offlineNotFound = false,
-    //       onlineNotFound = false;
-    //
-    //   let recordWrapper = RecordWrapper.create({
-    //     syncStore: this,
-    //     recordType: type
-    //   });
-    //
-    //   offlinePromise
-    //     .then(record => {
-    //       if (!isResolved) {
-    //         isResolved = true;
-    //         recordWrapper.set('content', record);
-    //         resolve(recordWrapper);
-    //       }
-    //     })
-    //     .catch(error => {
-    //       offlineNotFound = true;
-    //
-    //       if (offlineNotFound && onlineNotFound) {
-    //         reject(error);
-    //       }
-    //     });
-    //
-    //   onlinePromise
-    //     .then(record => {
-    //
-    //       // promise has not been resolved
-    //       // means that localRecord is not found
-    //       // we push the remoteRecord into offlineStore
-    //       if (!isResolved) {
-    //         recordWrapper.set('content', record);
-    //         resolve(recordWrapper);
-    //
-    //         this.offlineStore.pushPayload(type, record.serialize());
-    //       }
-    //     })
-    //     .catch(error => {
-    //       onlineNotFound = true;
-    //
-    //       if (offlineNotFound && onlineNotFound) {
-    //         reject(error);
-    //       }
-    //     });
-    // });
+  findRecord(/* type, id */) {
+
   },
 
+  /**
+   * Resolved using offlineStore, background fetch from the onineStore
+   *
+   * @param  {String} type
+   * @return {RecordArray}
+   */
   findAll(type) {
     let offlinePromise = this.offlineStore.findAll(type),
         onlinePromise = this.onlineStore.findAll(type);
@@ -68,8 +21,7 @@ export default Ember.Object.extend({
     onlinePromise.then(records => {
       records.forEach(record => {
         this.offlineStore.findRecord(type, record.get('id'))
-          .catch(err => {
-            console.log(err);
+          .catch(() => {
             let tobeSave = this.offlineStore.createRecord('todo', record.serialize({includeId: true}));
             tobeSave.save();
           });
@@ -83,16 +35,35 @@ export default Ember.Object.extend({
 
   },
 
-  createRecord() {
-
+  /**
+   * Proxy to offlineStore.createRecord
+   *
+   * @param  {String} modelName
+   * @param  {Object} inputProperties
+   * @return {DS.Model} record
+   */
+  createRecord(modelName, inputProperties) {
+    return this.offlineStore.createRecord(modelName, inputProperties);
   },
 
-  deleteRecord() {
-
+  /**
+   * Proxy to offlineStore.deleteRecord
+   *
+   * @param  {DS.Model} record
+   * @return
+   */
+  deleteRecord(record) {
+    return this.offlineStore.deleteRecord(record);
   },
 
-  destroyRecord() {
-
+  /**
+   * Proxy to offlineStore.unloadRecord
+   *
+   * @param  {DS.Model} record
+   * @return
+   */
+  unloadRecord(record) {
+    return this.offlineStore.unloadRecord(record);
   },
 
   sync() {
