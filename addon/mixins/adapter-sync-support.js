@@ -1,17 +1,17 @@
 import Ember from 'ember';
 
 export default Ember.Mixin.create({
-  createRecord() {
+  createRecord(/* store, type, snapshot */) {
     console.log('AdapterSyncSupport: createRecord');
     return this._super(...arguments);
   },
 
-  updateRecord() {
+  updateRecord(/* store, type, snapshot */) {
     console.log('AdapterSyncSupport: updateRecord');
     return this._super(...arguments);
   },
 
-  deleteRecord() {
+  deleteRecord(/* store, type, snapshot */) {
     console.log('AdapterSyncSupport: deleteRecord');
     return this._super(...arguments);
   }

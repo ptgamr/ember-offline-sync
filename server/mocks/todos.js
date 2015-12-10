@@ -13,6 +13,7 @@ module.exports = function(app) {
         {id: 6, title: 'todo 6', isDone: true},
         {id: 7, title: 'todo 7', isDone: true},
         {id: 8, title: 'todo 8', isDone: true},
+        {id: 9, title: 'todo 9', isDone: true},
       ]
     });
   });

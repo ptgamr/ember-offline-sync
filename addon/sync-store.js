@@ -67,18 +67,11 @@ export default Ember.Object.extend({
 
     onlinePromise.then(records => {
       records.forEach(record => {
-        this.offlineStore.findRecord(type, get(record, 'id'))
-          .catch(() => {
-            // let offlineAdapter = this.offlineStore.adapterFor(type);
-            // offlineAdapter
-            //   .createRecord(this.offlineStore, this.offlineStore.modelFor(type), record._createSnapshot())
-            //   .then(() => {
-            //     console.log('push record to offline store', record.serialize({includeId: true}));
-            //     this.offlineStore.didSaveRecord(record._internalModel);
-            //   });
-
-            // let tobeSave = this.offlineStore.createRecord('todo', {title: 'hehehe'});
-            // tobeSave.save();
+        this.offlineStore.findRecord(type, record.get('id'))
+          .catch(err => {
+            console.log(err);
+            let tobeSave = this.offlineStore.createRecord('todo', record.serialize({includeId: true}));
+            tobeSave.save();
           });
       });
     });
@@ -108,33 +101,5 @@ export default Ember.Object.extend({
 
   flushPendingChange(/*pendingChange*/) {
 
-  },
-
-  _wrapRecords(type, records) {
-    return records.map(record => {
-      return RecordWrapper.create({
-        syncStore: this,
-        recordType: type,
-        content: record
-      });
-    });
-  },
-
-  _addRecordsToStream(resultsStream, recordWrappers) {
-    let recordsInStream = get(resultsStream, 'content');
-
-    if (recordsInStream) {
-      let recordIds = recordsInStream.mapBy('id');
-      let recordsToAdd = recordWrappers.filter(recordWrapper => {
-        let id = get(recordWrapper, 'id');
-        return recordIds.indexOf(id) === -1;
-      });
-
-      recordsInStream.pushObjects(recordsToAdd);
-    } else {
-      set(resultsStream, 'content', recordWrappers);
-    }
-
-    return recordWrappers;
   }
 });
