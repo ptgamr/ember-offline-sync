@@ -1,5 +1,6 @@
-import LFAdapter from 'ember-localforage-adapter/adapters/localforage';
+import DS from 'ember-data';
+import AdapterSyncSupport from 'ember-offline-sync/mixins/adapter-sync-support';
 
-export default LFAdapter.extend({
-  caching: 'none'
+export default DS.LSAdapter.extend(AdapterSyncSupport, {
+    namespace: 'ember-offline-sync'
 });
