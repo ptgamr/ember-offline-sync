@@ -20,15 +20,17 @@ export default Ember.Mixin.create({
   },
 
   _createSyncOperation(operation, store, type, snapshot) {
-    if (type.modelName !== 'sync-operation') {
+    if (type.modelName !== 'pending-change') {
       let serializer = store.serializerFor(type.modelName);
       let recordHash = serializer.serialize(snapshot, {includeId: true});
 
-      if (operation === 'POST' && recordHash.id) {
+      // Here we assume that record comming from server has an integer id
+      // FIXME: this need to be improved
+      if (operation === 'POST' && !isNaN(parseInt(recordHash.id))) {
         return;
       }
 
-      let syncOperation = store.createRecord('sync-operation', {
+      let syncOperation = store.createRecord('pending-change', {
         modelName: type.modelName,
         serialized: recordHash,
         operation: operation,

@@ -1,8 +1,33 @@
 import Ember from 'ember';
+import Synchronizer from './synchronizer';
+
+const {
+  on,
+  computed,
+  observer,
+  get,
+  set
+} = Ember;
 
 export default Ember.Object.extend({
   onlineStore: null,
   offlineStore: null,
+  synchronizer: null,
+
+  storeReady: on('init', computed('onlineStore', 'offlineStore', function() {
+    return !!get(this, 'onlineStore') & !!get(this, 'offlineStore');
+  })),
+
+  initQueueWhenStoreReady: on('init', observer('storeReady', function() {
+    if (get(this, 'storeReady') && !get(this, 'synchronizer')) {
+      let synchronizer = Synchronizer.create({
+        onlineStore: get(this, 'onlineStore'),
+        offlineStore: get(this, 'offlineStore')
+      });
+      set(this, 'synchronizer', synchronizer);
+      synchronizer.sync();
+    }
+  })),
 
   findRecord(/* type, id */) {
 
